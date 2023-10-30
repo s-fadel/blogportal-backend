@@ -19,13 +19,9 @@ function initial() {
     name: "user"
   });
 
-  Role.create({
-    id: 2,
-    name: "moderator"
-  });
 
   Role.create({
-    id: 3,
+    id: 2,
     name: "admin"
   });
 }
