@@ -10,6 +10,8 @@ module.exports = function (app) {
     next();
   });
 
+  app.post("/api/auth/refreshtoken", controller.refreshToken)
+
   app.post(
     "/api/auth/signup",
     [
