@@ -11,7 +11,7 @@ const catchError = (err, res) => {
       .status(401)
       .send({ message: "Unauthorized! Access Token was expired!" });
   }
-  return res.sendStatus(401).send({ message: "Unauthorized!" });
+  return res.status(401).send({ message: "Unauthorized!" });
 };
 
 verifyToken = (req, res, next) => {
@@ -37,31 +37,14 @@ verifyToken = (req, res, next) => {
 isAdmin = (req, res, next) => {
   User.findByPk(req.userId).then((user) => {
     user.getRoles().then((roles) => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "admin") {
-          next();
-          return;
-        }
+      let isAdmin = roles.some((role) => role.name === "admin");
+      if (isAdmin) {
+        next();
+      } else {
+        res.status(403).send({
+          message: "Require Admin Role!",
+        });
       }
-      res.status(403).send({
-        message: "Require Admin Role!",
-      });
-    });
-  });
-};
-
-isUser = (req, res, next) => {
-  User.findByPk(req.userId).then((user) => {
-    user.getRoles().then((roles) => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "user" || roles[i].name === "admin") {
-          next();
-          return;
-        }
-      }
-      res.status(403).send({
-        message: "Require User or Admin Role!",
-      });
     });
   });
 };
@@ -69,7 +52,6 @@ isUser = (req, res, next) => {
 const authJwt = {
   verifyToken: verifyToken,
   isAdmin: isAdmin,
-  isUser: isUser,
 };
 
 module.exports = authJwt;
