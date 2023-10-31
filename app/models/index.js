@@ -17,10 +17,9 @@ const db = {};
 
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
-
 db.user = require("../models/user.model.js")(sequelize, Sequelize);
 db.role = require("../models/role.model.js")(sequelize, Sequelize);
-db.post = require("../models/post.model.js")(sequelize, Sequelize)
+db.post = require("../models/post.model.js")(sequelize, Sequelize);
 db.refreshToken = require("../models/refreshToken.model.js")(
   sequelize,
   Sequelize
@@ -43,10 +42,9 @@ db.refreshToken.belongsTo(db.user, {
   targetKey: "id",
 });
 
-db.post.belongsTo(db.post, {
-  through: "post",
-  foreignKey: "postId",
-})
+db.post.belongsTo(db.user, {
+  foreignKey: "adminId",
+});
 
 db.user.hasOne(db.refreshToken, {
   foreignKey: "userId",
