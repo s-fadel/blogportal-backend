@@ -5,6 +5,7 @@ require("dotenv").config();
 const app = express();
 const db = require("./app/models");
 const Role = db.role;
+const controller = require("./app/controllers/invite.controller");
 
 db.sequelize.sync({ force: true }).then(() => {
   console.log("Drop and Resync Db");
@@ -26,6 +27,7 @@ function initial() {
 var corsOptions = {
   origin: "http://localhost:8081",
 };
+
 
 app.use(cors(corsOptions));
 
