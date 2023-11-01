@@ -1,3 +1,4 @@
+//user.routes.js
 const { authJwt } = require("../middleware");
 const controller = require("../controllers/user.controller");
 
@@ -20,9 +21,15 @@ module.exports = function (app) {
     controller.adminBoard
   );
 
-   app.put(
-     "/api/updateUserRole/:id",
-     [authJwt.verifyToken, authJwt.isAdmin],
-     controller.updateUserRole
-   );
+  app.put(
+    "/api/updateUserRole/:id",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.updateUserRole
+  );
+
+  app.delete(
+    "/api/deleteUser/:id",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    controller.deleteUser
+  );
 };
