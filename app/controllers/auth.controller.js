@@ -1,7 +1,8 @@
+//auth.controller.js
 const db = require("../models");
 const config = require("../config/auth.config");
 const { user: User, role: Role, refreshToken: RefreshToken } = db;
-
+const Op = db.Sequelize.Op;
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
@@ -60,17 +61,18 @@ exports.signin = (req, res) => {
         });
       }
 
-      const token = jwt.sign({ id: user.id }, config.secret, {
-        expiresIn: config.jwtExpiration,
-      });
-
-      let refreshToken = await RefreshToken.createToken(user);
-
-      let authorities = [];
+      // Get user roles
       user.getRoles().then((roles) => {
-        for (let i = 0; i < roles.length; i++) {
-          authorities.push("ROLE_" + roles[i].name.toUpperCase());
-        }
+        const token = jwt.sign({ id: user.id }, config.secret, {
+          expiresIn: config.jwtExpiration,
+        });
+
+        let refreshToken = RefreshToken.createToken(user);
+
+        let authorities = [];
+        roles.forEach((role) => {
+          authorities.push("ROLE_" + role.name.toUpperCase());
+        });
 
         res.status(200).send({
           id: user.id,
@@ -100,18 +102,16 @@ exports.refreshToken = async (req, res) => {
     });
 
     if (!refreshToken) {
-      res
+      return res
         .status(403)
         .json({ message: "Refresh token is not in the database!" });
-      return;
     }
 
     if (RefreshToken.verifyExpiration(refreshToken)) {
       RefreshToken.destroy({ where: { id: refreshToken.id } });
-      res.status(403).json({
+      return res.status(403).json({
         message: "Refresh token was expired. Please make a new signin request",
       });
-      return;
     }
 
     const user = await refreshToken.getUser();
@@ -124,6 +124,6 @@ exports.refreshToken = async (req, res) => {
       refreshToken: refreshToken.token,
     });
   } catch (err) {
-    return res.status(500).send({ message: err });
+    return res.status(500).send({ message: err.message });
   }
 };

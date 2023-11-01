@@ -1,3 +1,4 @@
+//authJwt.js
 const jwt = require("jsonwebtoken");
 const config = require("../config/auth.config.js");
 const db = require("../models");
@@ -11,10 +12,10 @@ const catchError = (err, res) => {
       .status(401)
       .send({ message: "Unauthorized! Access Token was expired!" });
   }
-  return res.sendStatus(401).send({ message: "Unauthorized!" });
+  return res.status(401).send({ message: "Unauthorized!" });
 };
 
-verifyToken = (req, res, next) => {
+const verifyToken = (req, res, next) => {
   let token = req.headers["x-access-token"];
 
   if (!token) {
@@ -34,33 +35,39 @@ verifyToken = (req, res, next) => {
   });
 };
 
-isAdmin = (req, res, next) => {
-  User.findByPk(req.userId).then((user) => {
-    user.getRoles().then((roles) => {
-      for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "admin") {
-          next();
-          return;
-        }
-      }
-      res.status(403).send({
-        message: "Require Admin Role!",
-      });
+const isAdmin = (req, res, next) => {
+  User.findByPk(req.userId)
+    .then((user) => {
+      user
+        .getRoles()
+        .then((roles) => {
+          const isAdmin = roles.some((role) => role.name === "admin");
+          if (isAdmin) {
+            next(); 
+          } else {
+            res.status(403).send({ message: "Require Admin Role!" });
+          }
+        })
+        .catch((error) => {
+          res.status(500).send({ message: error.message });
+        });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
     });
-  });
 };
 
-isUser = (req, res, next) => {
+const isUser = (req, res, next) => {
   User.findByPk(req.userId).then((user) => {
     user.getRoles().then((roles) => {
       for (let i = 0; i < roles.length; i++) {
-        if (roles[i].name === "user" || roles[i].name === "admin") {
+        if (roles[i].name === "user") {
           next();
           return;
         }
       }
       res.status(403).send({
-        message: "Require User or Admin Role!",
+        message: "Require User Role!",
       });
     });
   });
