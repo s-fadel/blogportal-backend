@@ -19,6 +19,12 @@ module.exports = function (app) {
   // Hämta alla inlägg (publik åtkomst)
   app.get("/api/posts", postController.getAllPosts);
 
+  app.put(
+    "/api/updatePost/:id",
+    [authJwt.verifyToken, authJwt.isAdmin],
+    postController.updatePost
+  );
+
   app.delete(
     "/api/deletePost/:id",
     [authJwt.verifyToken, authJwt.isAdmin],

@@ -43,3 +43,25 @@ exports.deletePost = async (req, res) => {
     res.status(500).send({ message: err.message });
   }
 };
+
+exports.updatePost = async (req, res) => {
+  const postId = req.params.id;
+
+  try {
+    const post = await Post.findByPk(postId);
+
+    if (!post) {
+      return res
+        .status(404)
+        .send({ message: `Kunde inte hitta inlägget med id ${postId}.` });
+    }
+    post.title = req.body.title;
+    post.content = req.body.content;
+
+    await post.save();
+
+    res.send({ message: "Inlägg uppdaterat framgångsrikt!", post });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
