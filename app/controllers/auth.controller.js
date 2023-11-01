@@ -1,12 +1,24 @@
-//auth.controller.js
 const db = require("../models");
 const config = require("../config/auth.config");
 const { user: User, role: Role, refreshToken: RefreshToken } = db;
+
 const Op = db.Sequelize.Op;
+
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
+  // Check password complexity
+  const passwordRegex =
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  if (!passwordRegex.test(req.body.password)) {
+    return res.status(400).send({
+      message:
+        "Password should be at least 8 characters long and contain at least one uppercase letter, one digit, and one special character (@$!%*?&).",
+    });
+  }
+
   // Save User to Database
   User.create({
     username: req.body.username,
