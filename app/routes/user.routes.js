@@ -19,4 +19,10 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.adminBoard
   );
+
+   app.put(
+     "/api/updateUserRole/:id",
+     [authJwt.verifyToken, authJwt.isAdmin],
+     controller.updateUserRole
+   );
 };
