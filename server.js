@@ -1,10 +1,9 @@
+//server.js
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-
 const app = express();
 const db = require("./app/models");
-
 const Role = db.role;
 
 db.sequelize.sync({ force: true }).then(() => {
@@ -35,6 +34,8 @@ app.use(express.json());
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
+
+app.post("/invite-user", controller.inviteUser);
 
 // simple route
 app.get("/", (req, res) => {

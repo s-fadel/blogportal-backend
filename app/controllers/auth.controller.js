@@ -1,3 +1,4 @@
+//auth.controller.js
 const db = require("../models");
 const config = require("../config/auth.config");
 const { user: User, role: Role, refreshToken: RefreshToken } = db;

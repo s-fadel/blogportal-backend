@@ -22,24 +22,24 @@ exports.getAllPosts = (req, res) => {
     .catch((err) => {
       res.status(500).send({ message: err.message });
     });
+};
 
-   /*  exports.deletePost = (req, res) => {
-      const postId = req.params.id;
+exports.deletePost = async (req, res) => {
+  try {
+    const postId = req.params.id;
 
-      Post.destroy({
-        where: { id: postId },
-      })
-        .then((num) => {
-          if (num === 1) {
-            res.send({ message: "Inlägg raderat framgångsrikt!" });
-          } else {
-            res
-              .status(404)
-              .send({ message: `Kunde inte hitta inlägget med id ${postId}.` });
-          }
-        })
-        .catch((err) => {
-          res.status(500).send({ message: err.message });
-        });
-    }; */
+    const num = await Post.destroy({
+      where: { id: postId },
+    });
+
+    if (String(num) === String(1)) {
+      res.send({ message: "Inlägg raderat framgångsrikt!" });
+    } else {
+      res
+        .status(404)
+        .send({ message: `Kunde inte hitta inlägget med id ${postId}.` });
+    }
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
 };
