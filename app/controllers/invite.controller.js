@@ -1,7 +1,5 @@
-// inviteUser.controller.js
-
 const db = require("../models");
-const User = db.user;
+const Invite = db.invite;
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 
@@ -9,11 +7,12 @@ exports.inviteUser = async (req, res) => {
   const { email } = req.body;
 
   try {
-    // Här kan du verifiera om den som gör anropet har admin-privilegier
-    // För enkelhetens skull låt oss anta att användaren som anropar denna funktion är en admin
-
-    // Skapa en inbjudningslänk för användaren
     const invitationToken = crypto.randomBytes(20).toString("hex");
+    Invite.create({
+      token: invitationToken,
+      email: email,
+    });
+
     const invitationLink = `https://localhost:8080/set-password/${invitationToken}`;
 
     // Skicka e-post till användaren med inbjudningslänken
@@ -38,11 +37,9 @@ exports.inviteUser = async (req, res) => {
     transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.log(error);
-        return res
-          .status(500)
-          .send({
-            message: "Något gick fel vid sändningen av inbjudan via e-post.",
-          });
+        return res.status(500).send({
+          message: "Något gick fel vid sändningen av inbjudan via e-post.",
+        });
       } else {
         console.log("Email sent: " + info.response);
         return res

@@ -1,11 +1,14 @@
-//server.js
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
+const bcrypt = require("bcryptjs");
+
 const app = express();
 const db = require("./app/models");
+const Op = db.Sequelize.Op;
+
 const Role = db.role;
-const controller = require("./app/controllers/invite.controller");
+const User = db.user;
 
 db.sequelize.sync({ force: true }).then(() => {
   console.log("Drop and Resync Db");
@@ -22,12 +25,37 @@ function initial() {
     id: 2,
     name: "admin",
   });
+  const password = bcrypt.hashSync("admin", 8);
+  const roles = ["admin"];
+  User.create({
+    username: "admin",
+    email: "admin@admin.com",
+    password: password,
+  })
+    .then((user) => {
+      if (roles) {
+        Role.findAll({
+          where: {
+            name: {
+              [Op.or]: roles,
+            },
+          },
+        }).then((roles) => {
+          user.setRoles(roles).then(() => {});
+        });
+      } else {
+        // user role = 1
+        user.setRoles([1]).then(() => {});
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
 
 var corsOptions = {
   origin: "http://localhost:8081",
 };
-
 
 app.use(cors(corsOptions));
 
@@ -37,11 +65,9 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
-app.post("/invite-user", controller.inviteUser);
-
 // simple route
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to bezkoder application." });
+  res.json({ message: "Welcome to stephanie application." });
 });
 
 // routes
