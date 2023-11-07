@@ -1,22 +1,27 @@
 const db = require("../models");
 const Invite = db.invite;
 const nodemailer = require("nodemailer");
-const crypto = require("crypto");
+const config = require("../config/auth.config");
+const jwt = require("jsonwebtoken");
 
 exports.inviteUser = async (req, res) => {
   const { email, selectedRole } = req.body;
-
   try {
-    const invitationToken = crypto.randomBytes(20).toString("hex");
+    const invitationToken = jwt.sign(
+      { email: email, role: selectedRole },
+      config.secret,
+      {
+        expiresIn: config.jwtExpiration,
+      }
+    );
     Invite.create({
       token: invitationToken,
       email: email,
-      role: selectedRole, // Sparar den valda rollen
+      role: selectedRole,
     });
 
-    const invitationLink = `https://localhost:8080/set-password/${invitationToken}`;
+    const invitationLink = `https://localhost:3000/set-password/?invitationToken=${invitationToken}`;
 
-    // Skicka e-post till användaren med inbjudningslänken
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {

@@ -1,14 +1,11 @@
 const db = require("../models");
 const config = require("../config/auth.config");
 const { user: User, role: Role, refreshToken: RefreshToken } = db;
-
 const Op = db.Sequelize.Op;
-
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
-  // Check password complexity
   const passwordRegex =
     /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
@@ -18,8 +15,8 @@ exports.signup = (req, res) => {
         "Password should be at least 8 characters long and contain at least one uppercase letter, one digit, and one special character (@$!%*?&).",
     });
   }
-
-  // Save User to Database
+  // Skapa en användare med hjälp av token - Se över koden
+  //användarnamn eller email eller enbart email
   User.create({
     username: req.body.username,
     email: req.body.email,
@@ -39,7 +36,6 @@ exports.signup = (req, res) => {
           });
         });
       } else {
-        // user role = 1
         user.setRoles([1]).then(() => {
           res.send({ message: "User was registered successfully!" });
         });
@@ -72,8 +68,6 @@ exports.signin = (req, res) => {
           message: "Invalid Password!",
         });
       }
-
-      // Get user roles
       user.getRoles().then((roles) => {
         const token = jwt.sign({ id: user.id }, config.secret, {
           expiresIn: config.jwtExpiration,
