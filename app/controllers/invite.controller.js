@@ -4,13 +4,14 @@ const nodemailer = require("nodemailer");
 const crypto = require("crypto");
 
 exports.inviteUser = async (req, res) => {
-  const { email } = req.body;
+  const { email, selectedRole } = req.body;
 
   try {
     const invitationToken = crypto.randomBytes(20).toString("hex");
     Invite.create({
       token: invitationToken,
       email: email,
+      role: selectedRole, // Sparar den valda rollen
     });
 
     const invitationLink = `https://localhost:8080/set-password/${invitationToken}`;
