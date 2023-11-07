@@ -1,8 +1,10 @@
+const jwt = require("jsonwebtoken");
 const db = require("../models");
 const config = require("../config/auth.config");
 const { user: User, role: Role, refreshToken: RefreshToken } = db;
+
 const Op = db.Sequelize.Op;
-const jwt = require("jsonwebtoken");
+
 const bcrypt = require("bcryptjs");
 
 exports.signup = (req, res) => {
@@ -15,9 +17,9 @@ exports.signup = (req, res) => {
         "Password should be at least 8 characters long and contain at least one uppercase letter, one digit, and one special character (@$!%*?&).",
     });
   }
-  // Skapa en användare med hjälp av token - Se över koden
-  //användarnamn eller email eller enbart email
-  User.create({
+
+  // Save User to Database
+/*   User.create({
     username: req.body.username,
     email: req.body.email,
     password: bcrypt.hashSync(req.body.password, 8),
@@ -36,6 +38,7 @@ exports.signup = (req, res) => {
           });
         });
       } else {
+        // user role = 1
         user.setRoles([1]).then(() => {
           res.send({ message: "User was registered successfully!" });
         });
@@ -43,10 +46,11 @@ exports.signup = (req, res) => {
     })
     .catch((err) => {
       res.status(500).send({ message: err.message });
-    });
+    }); */
 };
 
 exports.signin = (req, res) => {
+  console.log("signin endpoint called1");
   User.findOne({
     where: {
       username: req.body.username,
@@ -68,6 +72,7 @@ exports.signin = (req, res) => {
           message: "Invalid Password!",
         });
       }
+
       user.getRoles().then((roles) => {
         const token = jwt.sign({ id: user.id }, config.secret, {
           expiresIn: config.jwtExpiration,
@@ -108,16 +113,18 @@ exports.refreshToken = async (req, res) => {
     });
 
     if (!refreshToken) {
-      return res
+      res
         .status(403)
         .json({ message: "Refresh token is not in the database!" });
+      return;
     }
 
     if (RefreshToken.verifyExpiration(refreshToken)) {
       RefreshToken.destroy({ where: { id: refreshToken.id } });
-      return res.status(403).json({
+      res.status(403).json({
         message: "Refresh token was expired. Please make a new signin request",
       });
+      return;
     }
 
     const user = await refreshToken.getUser();
@@ -130,6 +137,45 @@ exports.refreshToken = async (req, res) => {
       refreshToken: refreshToken.token,
     });
   } catch (err) {
-    return res.status(500).send({ message: err.message });
+    return res.status(500).send({ message: err });
+  }
+};
+exports.createUserWithPassword = async (req, res) => {
+  const { token, password, username } = req.body;
+
+  try {
+    const userToken = jwt.verify(token, config.secret);
+    const userEmail = userToken.email;
+
+    // Skapa användaren i databasen
+    User.create({
+      email: userEmail,
+      username: username,
+      password: bcrypt.hashSync(password, 8),
+    })
+      .then((user) => {
+        if (req.body.roles) {
+          Role.findAll({
+            where: {
+              name: {
+                [Op.or]: req.body.roles,
+              },
+            },
+          }).then((roles) => {
+            user.setRoles(roles).then(() => {
+              res.send({ message: "User was registered successfully!" });
+            });
+          });
+        } else {
+          user.setRoles([1]).then(() => {
+            res.send({ message: "User was registered successfully!" });
+          });
+        }
+      })
+      .catch((err) => {
+        res.status(500).send({ message: err.message });
+      });
+  } catch (error) {
+    return res.status(500).send({ message: error.message });
   }
 };

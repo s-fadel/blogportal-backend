@@ -67,3 +67,13 @@ exports.deleteUser = (req, res) => {
       res.status(500).send({ message: err.message });
     });
 };
+
+exports.getAllUsers = (req, res) => {
+  User.findAll()
+    .then((users) => {
+      res.status(200).json(users);
+    })
+    .catch((error) => {
+      res.status(500).send({ message: error.message });
+    });
+};

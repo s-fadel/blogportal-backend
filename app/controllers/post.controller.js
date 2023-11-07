@@ -1,18 +1,23 @@
 const db = require("../models");
 const Post = db.post;
+const { authJwt } = require("../middleware");
 
-exports.createPost = (req, res) => {
-  Post.create({
-    title: req.body.title,
-    content: req.body.content,
-  })
-    .then((post) => {
-      res.send({ message: "Post created successfully!", post });
+exports.createPost = [
+  authJwt.verifyToken,
+  authJwt.isAdmin,
+  (req, res) => {
+    Post.create({
+      title: req.body.title,
+      content: req.body.content,
     })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
-    });
-};
+      .then((post) => {
+        res.send({ message: "Post created successfully!", post });
+      })
+      .catch((err) => {
+        res.status(500).send({ message: err.message });
+      });
+  },
+];
 
 exports.getAllPosts = (req, res) => {
   Post.findAll()
