@@ -1,23 +1,31 @@
 const db = require("../models");
 const Post = db.post;
-const { authJwt } = require("../middleware");
+const jwt = require("jsonwebtoken");
+const config = require("../config/auth.config");
 
-exports.createPost = [
-  authJwt.verifyToken,
-  authJwt.isAdmin,
-  (req, res) => {
-    Post.create({
-      title: req.body.title,
-      content: req.body.content,
-    })
-      .then((post) => {
-        res.send({ message: "Post created successfully!", post });
+
+exports.createPost = (req, res) => {
+  const token = req.headers["x-access-token"];
+  jwt.verify(token, config.secret, (err, decoded) => {
+    if (err) {
+      return res.status(401).send({ message: "Unauthorized!" });
+    }
+    if (decoded && decoded.roles.includes("admin")) {
+      Post.create({
+        title: req.body.title,
+        content: req.body.content,
       })
-      .catch((err) => {
-        res.status(500).send({ message: err.message });
-      });
-  },
-];
+        .then((post) => {
+          res.send({ message: "Post created successfully!", post });
+        })
+        .catch((err) => {
+          res.status(500).send({ message: err.message });
+        });
+    } else {
+      res.status(403).send({ message: "Require Admin Role!" });
+    }
+  });
+};
 
 exports.getAllPosts = (req, res) => {
   Post.findAll()
