@@ -10,7 +10,7 @@ module.exports = function (app) {
 
   app.get(
     "/api/getAll",
-    [authJwt.verifyToken, authJwt.isAdmin],
+    [authJwt.verifyToken],
     postController.getAllPosts
   );
 
