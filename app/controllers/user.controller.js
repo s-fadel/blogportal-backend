@@ -1,4 +1,5 @@
 //user.controller.js
+const { authJwt } = require("../middleware");
 const db = require("../models");
 const { user: User, role: Role, refreshToken: RefreshToken } = db;
 const Op = db.Sequelize.Op;
@@ -45,27 +46,28 @@ exports.updateUserRole = (req, res) => {
 
 exports.deleteUser = (req, res) => {
   const userId = req.params.id;
+  authJwt.verifyToken,
+    authJwt.isAdmin,
+    User.findByPk(userId)
+      .then((user) => {
+        if (!user) {
+          return res
+            .status(404)
+            .send({ message: `Kunde inte hitta användaren med id ${userId}.` });
+        }
 
-  User.findByPk(userId)
-    .then((user) => {
-      if (!user) {
-        return res
-          .status(404)
-          .send({ message: `Kunde inte hitta användaren med id ${userId}.` });
-      }
-
-      user
-        .destroy()
-        .then(() => {
-          res.send({ message: "Användaren är borttagen!" });
-        })
-        .catch((error) => {
-          res.status(500).send({ message: error.message });
-        });
-    })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
-    });
+        user
+          .destroy()
+          .then(() => {
+            res.send({ message: "Användaren är borttagen!" });
+          })
+          .catch((error) => {
+            res.status(500).send({ message: error.message });
+          });
+      })
+      .catch((err) => {
+        res.status(500).send({ message: err.message });
+      });
 };
 
 exports.getAllUsers = (req, res) => {
