@@ -19,6 +19,8 @@ exports.createPost = [
   },
 ];
 
+
+//Endast inloggade användare ska kunna se inlägg
 exports.getAllPosts = (req, res) => {
   Post.findAll()
     .then((posts) => {
@@ -29,44 +31,52 @@ exports.getAllPosts = (req, res) => {
     });
 };
 
-exports.deletePost = async (req, res) => {
-  try {
-    const postId = req.params.id;
+exports.deletePost = [
+  authJwt.verifyToken,
+  authJwt.isAdmin,
+  async (req, res) => {
+    try {
+      const postId = req.params.id;
 
-    const num = await Post.destroy({
-      where: { id: postId },
-    });
+      const num = await Post.destroy({
+        where: { id: postId },
+      });
 
-    if (String(num) === String(1)) {
-      res.send({ message: "Inlägg raderat framgångsrikt!" });
-    } else {
-      res
-        .status(404)
-        .send({ message: `Kunde inte hitta inlägget med id ${postId}.` });
+      if (String(num) === String(1)) {
+        res.send({ message: "Inlägg raderat framgångsrikt!" });
+      } else {
+        res
+          .status(404)
+          .send({ message: `Kunde inte hitta inlägget med id ${postId}.` });
+      }
+    } catch (err) {
+      res.status(500).send({ message: err.message });
     }
-  } catch (err) {
-    res.status(500).send({ message: err.message });
-  }
-};
+  },
+];
 
-exports.updatePost = async (req, res) => {
-  const postId = req.params.id;
+exports.updatePost = [
+  authJwt.verifyToken,
+  authJwt.isAdmin,
+  async (req, res) => {
+    try {
+      const postId = req.params.id;
+      const post = await Post.findByPk(postId);
 
-  try {
-    const post = await Post.findByPk(postId);
+      if (!post) {
+        return res
+          .status(404)
+          .send({ message: `Kunde inte hitta inlägget med id ${postId}.` });
+      }
 
-    if (!post) {
-      return res
-        .status(404)
-        .send({ message: `Kunde inte hitta inlägget med id ${postId}.` });
+      post.title = req.body.title;
+      post.content = req.body.content;
+
+      await post.save();
+
+      res.send({ message: "Inlägg uppdaterat framgångsrikt!", post });
+    } catch (err) {
+      res.status(500).send({ message: err.message });
     }
-    post.title = req.body.title;
-    post.content = req.body.content;
-
-    await post.save();
-
-    res.send({ message: "Inlägg uppdaterat framgångsrikt!", post });
-  } catch (err) {
-    res.status(500).send({ message: err.message });
-  }
-};
+  },
+];

@@ -14,7 +14,6 @@ module.exports = function (app) {
     postController.getAllPosts
   );
 
-  // Hämta alla inlägg (publik åtkomst)
   app.get("/api/posts", postController.getAllPosts);
 
   app.put(
