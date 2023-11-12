@@ -6,6 +6,9 @@ module.exports = (sequelize, Sequelize) => {
     email: {
       type: Sequelize.STRING,
     },
+    selectedRole: {
+      type: Sequelize.STRING,
+    },
   });
 
   return Invite;

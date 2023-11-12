@@ -1,22 +1,26 @@
 const jwt = require("jsonwebtoken");
-
 const db = require("../models");
 const Invite = db.invite;
 const nodemailer = require("nodemailer");
 const config = require("../config/auth.config");
 
 exports.inviteUser = async (req, res) => {
-  const { email } = req.body;
+  const { email, selectedRole } = req.body;
 
   try {
-    const invitationToken = jwt.sign({ email: email }, config.secret, {
-      expiresIn: config.jwtExpiration,
-    });
+    const invitationToken = jwt.sign(
+      { email: email, selectedRole },
+      config.secret,
+      {
+        expiresIn: config.jwtExpiration,
+      }
+    );
 
     // Spara JWT-token i din databas
     Invite.create({
       token: invitationToken,
       email: email,
+      selectedRole,
     });
 
     const invitationLink = `http://localhost:3000/set-password/?invitationToken=${invitationToken}`;
