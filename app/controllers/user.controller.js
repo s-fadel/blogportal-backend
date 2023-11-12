@@ -1,8 +1,13 @@
-//user.controller.js
-const { authJwt } = require("../middleware");
 const db = require("../models");
-const { user: User, role: Role, refreshToken: RefreshToken } = db;
+const { authJwt } = require("../middleware");
+const {
+  user: User,
+  role: Role,
+  refreshToken: RefreshToken,
+  invite: Invite,
+} = db;
 const Op = db.Sequelize.Op;
+
 exports.allAccess = (req, res) => {
   res.status(200).send("Public Content.");
 };
@@ -24,6 +29,8 @@ exports.updateUserRole = (req, res) => {
         .status(404)
         .send({ message: `Kunde inte hitta användaren med id ${userId}.` });
     }
+
+    // Ändra användarens roll till "admin" (eller annan roll)
     if (req.body.roles) {
       Role.findAll({
         where: {
@@ -37,6 +44,7 @@ exports.updateUserRole = (req, res) => {
         });
       });
     } else {
+      // Om du inte har ett roles-fält i din request, kan du använda en standardroll (t.ex. "user")
       user.setRoles([1]).then(() => {
         res.send({ message: "Användarens roll uppdaterad!" });
       });
@@ -70,12 +78,34 @@ exports.deleteUser = (req, res) => {
       });
 };
 
-exports.getAllUsers = (req, res) => {
-  User.findAll()
-    .then((users) => {
-      res.status(200).json(users);
-    })
-    .catch((error) => {
-      res.status(500).send({ message: error.message });
+exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.findAll({
+      include: Role, // Detta kommer att inkludera användarrollerna
     });
+
+    const usersWithRoles = users.map((user) => {
+      const roles = user.roles.map((role) => role.name);
+      return {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        roles: roles,
+      };
+    });
+
+    res.status(200).json(usersWithRoles);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+};
+
+exports.getInvitedUsers = async (req, res) => {
+  try {
+    const invitedUsers = await Invite.findAll();
+
+    res.status(200).json(invitedUsers);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
 };

@@ -1,6 +1,6 @@
-const { verifySignUp, authJwt } = require("../middleware");
+const { verifySignUp } = require("../middleware");
 const authController = require("../controllers/auth.controller");
-const inviteController = require("../controllers/invite.controller");
+const inviteController = require("../controllers/invite.controllers");
 
 module.exports = function (app) {
   app.use(function (req, res, next) {
@@ -25,12 +25,6 @@ module.exports = function (app) {
   app.post("/api/auth/signin", authController.signin);
 
   app.post("/api/auth/inviteUser", inviteController.inviteUser);
-
- /*  app.get(
-    "/api/users",
-    [authJwt.verifyToken, authJwt.isAdmin], 
-    controller.getAllUsers
-  );  */
 
   app.post(
     "/api/createUserWithPassword",

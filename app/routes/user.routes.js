@@ -34,7 +34,8 @@ module.exports = function (app) {
   );
   app.get(
     "/api/users",
-    /*  [authJwt.verifyToken, authJwt.isAdmin], */
+    [authJwt.verifyToken, authJwt.isAdmin],
     controller.getAllUsers
   );
+  app.get("/api/invitedUsers", controller.getInvitedUsers);
 };
