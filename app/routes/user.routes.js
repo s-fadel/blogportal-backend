@@ -1,4 +1,3 @@
-//user.routes.js
 const { authJwt } = require("../middleware");
 const controller = require("../controllers/user.controller");
 
@@ -32,10 +31,7 @@ module.exports = function (app) {
     [authJwt.verifyToken, authJwt.isAdmin],
     controller.deleteUser
   );
-  app.get(
-    "/api/users",
-    [authJwt.verifyToken, authJwt.isAdmin],
-    controller.getAllUsers
-  );
+  app.get("/api/users", controller.getAllUsers);
+
   app.get("/api/invitedUsers", controller.getInvitedUsers);
 };
