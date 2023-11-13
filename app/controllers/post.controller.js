@@ -7,7 +7,6 @@ exports.createPost = [
   authJwt.isAdmin,
   (req, res) => {
     Post.create({
-      title: req.body.title,
       content: req.body.content,
     })
       .then((post) => {
@@ -69,7 +68,6 @@ exports.updatePost = [
           .send({ message: `Kunde inte hitta inlägget med id ${postId}.` });
       }
 
-      post.title = req.body.title;
       post.content = req.body.content;
 
       await post.save();
