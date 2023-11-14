@@ -63,6 +63,7 @@ exports.signin = (req, res) => {
           roles: authorities,
           accessToken: token,
           refreshToken: refreshToken,
+          expiresIn: config.jwtExpiration,
         });
       });
     })
@@ -134,7 +135,7 @@ exports.createUserWithPassword = async (req, res) => {
             },
           }).then((roles) => {
             user.setRoles(roles).then(() => {
-              res.send({ message: "User was registered successfully!" });
+              res.send({ message: "User was registered successfully!"});
             });
           });
         } else {

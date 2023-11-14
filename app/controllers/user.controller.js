@@ -82,7 +82,7 @@ exports.deleteUser = (req, res) => {
 exports.getAllUsers = async (req, res) => {
   try {
     const users = await User.findAll({
-      include: Role, // Detta kommer att inkludera användarrollerna
+      include: Role, 
     });
 
     const usersWithRoles = users.map((user) => {

@@ -34,4 +34,9 @@ module.exports = function (app) {
     "/api/createUserWithPassword",
     authController.createUserWithPassword
   );
+   app.delete(
+     "/api/removeInvitedUser",
+     [authJwt.verifyToken, authJwt.isAdmin],
+     inviteController.removeInvitedUser
+   );
 };

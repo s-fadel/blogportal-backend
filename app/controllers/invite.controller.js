@@ -3,6 +3,7 @@ const db = require("../models");
 const Invite = db.invite;
 const nodemailer = require("nodemailer");
 const config = require("../config/auth.config");
+const { authJwt } = require("../middleware");
 
 exports.inviteUser = async (req, res) => {
   const { email, selectedRole } = req.body;
@@ -16,7 +17,6 @@ exports.inviteUser = async (req, res) => {
       }
     );
 
-    // Spara JWT-token i din databas
     Invite.create({
       token: invitationToken,
       email: email,
@@ -63,4 +63,54 @@ exports.inviteUser = async (req, res) => {
   return res.status(200).send({
     message: "Inbjudan skickad framgångsrikt via e-post!",
   });
+};
+
+/* exports.removeInvitedUser = async (req, res) => {
+     authJwt.verifyToken,
+    authJwt.isAdmin,
+  const { token } = req.body;
+
+  try {
+    const userToken = jwt.verify(token, config.secret);
+    const userEmail = userToken.email;
+    const removedUser = await Invite.destroy({
+      where: { email: userEmail },
+    });
+
+    if (removedUser) {
+      return res.status(200).send({
+        message: "Invited user removed successfully!",
+      });
+    } else {
+      return res.status(404).send({
+        message: "Invited user not found.",
+      });
+    }
+  } catch (err) {
+    return res.status(500).send({ message: err.message });
+  }
+}; */
+
+exports.removeInvitedUser = (req, res) => {
+  const { token } = req.body;
+  authJwt.verifyToken,
+    authJwt.isAdmin,
+    Invite.findOne({ where: { token: token } })
+      .then((user) => {
+        if (!user) {
+          return res.status(404).send({ message: "Invited user not found." });
+        }
+
+        user
+          .destroy()
+          .then(() => {
+            res.send({ message: " Invited user removed successfully!" });
+          })
+          .catch((error) => {
+            res.status(500).send({ message: error.message });
+          });
+      })
+      .catch((err) => {
+        res.status(500).send({ message: err.message });
+      });
 };
