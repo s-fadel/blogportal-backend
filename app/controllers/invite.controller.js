@@ -65,32 +65,6 @@ exports.inviteUser = async (req, res) => {
   });
 };
 
-/* exports.removeInvitedUser = async (req, res) => {
-     authJwt.verifyToken,
-    authJwt.isAdmin,
-  const { token } = req.body;
-
-  try {
-    const userToken = jwt.verify(token, config.secret);
-    const userEmail = userToken.email;
-    const removedUser = await Invite.destroy({
-      where: { email: userEmail },
-    });
-
-    if (removedUser) {
-      return res.status(200).send({
-        message: "Invited user removed successfully!",
-      });
-    } else {
-      return res.status(404).send({
-        message: "Invited user not found.",
-      });
-    }
-  } catch (err) {
-    return res.status(500).send({ message: err.message });
-  }
-}; */
-
 exports.removeInvitedUser = (req, res) => {
   const { token } = req.body;
   authJwt.verifyToken,
